@@ -1,0 +1,3 @@
+weather-producer/.env
+weather-analyzer/.env
+alert-notification/.env 

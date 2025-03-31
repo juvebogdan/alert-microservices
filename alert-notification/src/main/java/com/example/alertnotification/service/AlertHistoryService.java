@@ -1,47 +1,38 @@
 package com.example.alertnotification.service;
 
 import com.example.alertnotification.model.WeatherAlert;
+import com.example.alertnotification.repository.WeatherAlertRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
+@RequiredArgsConstructor
 public class AlertHistoryService {
 
-    // In-memory storage for alerts (in a real app, this would be a database)
-    private final List<WeatherAlert> alertHistory = new CopyOnWriteArrayList<>();
+    // Inject the repository using constructor injection (handled by Lombok's @RequiredArgsConstructor)
+    private final WeatherAlertRepository alertRepository;
     
     public void addAlert(WeatherAlert alert) {
-        alertHistory.add(alert);
-        // Keep only the latest 100 alerts
-        if (alertHistory.size() > 100) {
-            alertHistory.remove(0);
-        }
+        // Save the alert to the database
+        alertRepository.save(alert);
     }
     
     public List<WeatherAlert> getRecentAlerts() {
-        // Return alerts in reverse chronological order (newest first)
-        List<WeatherAlert> recentAlerts = new ArrayList<>(alertHistory);
-        Collections.reverse(recentAlerts);
-        return recentAlerts;
+        // Return the most recent 100 alerts
+        return alertRepository.findAllByOrderByTimestampDesc(PageRequest.of(0, 100));
     }
     
     public List<WeatherAlert> getAlertsByLocation(String locationId) {
-        // Filter alerts by location
-        return alertHistory.stream()
-                .filter(alert -> alert.getLocationId().equals(locationId))
-                .sorted((a1, a2) -> a2.getTimestamp().compareTo(a1.getTimestamp()))
-                .toList();
+        // Get alerts for a specific location
+        return alertRepository.findByLocationIdOrderByTimestampDesc(locationId);
     }
     
     public List<WeatherAlert> getAlertsByType(String alertType) {
-        // Filter alerts by type
-        return alertHistory.stream()
-                .filter(alert -> alert.getAlertType().equals(alertType))
-                .sorted((a1, a2) -> a2.getTimestamp().compareTo(a1.getTimestamp()))
-                .toList();
+        // Get alerts of a specific type
+        return alertRepository.findByAlertTypeOrderByTimestampDesc(alertType);
     }
 }

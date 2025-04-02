@@ -1,0 +1,8 @@
+target/
+!target/alert-notification-0.0.1-SNAPSHOT.jar
+.mvn/
+mvnw
+mvnw.cmd
+.git
+.gitignore
+README.md
